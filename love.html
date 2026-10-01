@@ -1,0 +1,419 @@
+<!doctype html>
+<html lang ="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#f2e8d9">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <title>A little note for you</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --paper: #f5eee4;
+            --cream: #fffaf3;
+            --ink: #342d28;
+            --muted: #766b61;
+            --rose: #a95750;
+            --rose-dark: #85413d;
+            --sage: #77816a;
+            --line: #e7d9ca;
+            --serif: Georgia, "Times New Roman", serif;
+            --sans: "Trebuchet MS", "Segoe UI", sans-serif;
+        }
+        * { box-sizing: border-box; }
+        body {
+            min-height: 100vh;
+            margin: 0;
+            padding: 24px 16px;
+            display: grid;
+            place-items: center;
+            overflow-x: hidden;
+            color: var(--ink);
+            background: radial-gradient(ellipse at 12% 12%, #fffaf2 0, transparent 42%),
+                radial-gradient(ellipse at 90% 88%, #ead9c5 0, transparent 38%), var(--paper);
+            font-family: var(--sans);
+        }
+        button { font: inherit; }
+        [hidden] { display: none !important; }
+        .floaties { position: fixed; inset: 0; overflow: hidden; pointer-events: none; }
+        .floaty {
+            position: absolute;
+            bottom: -36px;
+            color: #b87970;
+            opacity: 0;
+            animation: drift 9s linear infinite;
+        }
+        .floaty:nth-child(1) { left: 8%; animation-delay: 0s; }
+        .floaty:nth-child(2) { left: 27%; animation-delay: 4s; font-size: 12px; }
+        .floaty:nth-child(3) { left: 51%; animation-delay: 1.8s; }
+        .floaty:nth-child(4) { left: 73%; animation-delay: 5.4s; font-size: 13px; }
+        .floaty:nth-child(5) { left: 91%; animation-delay: 3s; }
+        @keyframes drift {
+            8% { opacity: .55; }
+            100% { transform: translateY(-110vh) rotate(35deg); opacity: 0; }
+        }
+        .letter {
+            z-index: 1;
+            width: min(100%, 620px);
+            padding: clamp(26px, 7vw, 56px);
+            border: 1px solid rgba(137, 105, 80, .17);
+            border-radius: 8px;
+            background: rgba(255, 250, 243, .88);
+            box-shadow: 0 22px 70px rgba(93, 69, 48, .11);
+            text-align: center;
+            animation: arrive .7s ease-out both;
+        }
+        @keyframes arrive { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+        .eyebrow { margin: 0 0 16px; color: var(--sage); font-size: .72rem; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; }
+        h1, h2 { margin: 0; font-family: var(--serif); font-weight: 400; line-height: 1.13; }
+        h1 { font-size: clamp(2.35rem, 10vw, 4rem); }
+        h2 { font-size: clamp(1.85rem, 8vw, 2.7rem); }
+        .intro, .typed-copy, .closing-copy { max-width: 38ch; margin: 18px auto 26px; color: var(--muted); font-size: 1rem; line-height: 1.75; }
+        .typed-copy { min-height: 5.3em; color: var(--ink); font-family: var(--serif); font-size: 1.35rem; }
+        .caret::after { content: ""; display: inline-block; width: 1px; height: 1em; margin-left: 3px; background: var(--rose); vertical-align: -.12em; animation: blink .8s steps(2) infinite; }
+        @keyframes blink { 50% { opacity: 0; } }
+        .primary, .secondary, .choice {
+            min-height: 50px;
+            padding: 12px 22px;
+            border: 1px solid transparent;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform .2s ease, background .2s ease, box-shadow .2s ease;
+        }
+        .primary, .choice-yes { color: #fffaf5; background: var(--rose); }
+        .primary:hover, .choice-yes:hover { background: var(--rose-dark); box-shadow: 0 6px 18px #a9575030; }
+        .secondary, .choice-no { color: var(--ink); border-color: var(--line); background: #fffdf9; }
+        .primary:focus-visible, .secondary:focus-visible, .choice:focus-visible, .reason:focus-visible { outline: 3px solid #a9575070; outline-offset: 3px; }
+        .primary:active, .secondary:active { transform: scale(.98); }
+        .question-stage { position: relative; min-height: 148px; margin-top: 26px; }
+        .choices { display: flex; justify-content: center; align-items: center; gap: 14px; min-height: 60px; }
+        .choice { min-width: 104px; min-height: 54px; }
+        .choice-yes { transform: scale(var(--yes-scale, 1)); }
+        .choice-no.is-dodging { position: absolute; z-index: 2; transition: left .16s ease, top .16s ease; }
+        .hint { margin: 12px 0 0; color: var(--muted); font-size: .82rem; }
+        .reasons { display: grid; gap: 10px; margin: 24px 0; text-align: left; }
+        .reason {
+            display: flex;
+            width: 100%;
+            min-height: 58px;
+            align-items: center;
+            gap: 13px;
+            padding: 13px 15px;
+            border: 1px solid var(--line);
+            border-radius: 5px;
+            color: var(--ink);
+            background: #fffdf9;
+            cursor: pointer;
+            text-align: left;
+        }
+        .reason:hover { border-color: #c9a89b; }
+        .reason-mark { flex: 0 0 25px; color: var(--rose); font-family: var(--serif); font-size: 1.3rem; text-align: center; }
+        .reason-text { color: var(--muted); line-height: 1.5; }
+        .reason-text.is-hidden { color: var(--rose-dark); font-size: .9rem; }
+        .reasons-progress { min-height: 1.2em; margin: 0 0 20px; color: var(--muted); font-size: .82rem; }
+        .signature { margin: 24px 0 0; color: var(--rose-dark); font-family: var(--serif); font-size: 1.45rem; }
+        .music { margin-top: 30px; padding-top: 22px; border-top: 1px solid var(--line); }
+        .music-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; text-align: left; }
+        .music-title { margin: 0; color: var(--rose-dark); font-family: var(--serif); font-size: 1.15rem; }
+        .music-artist { display: block; margin-top: 4px; color: var(--muted); font-family: var(--sans); font-size: .78rem; }
+        .music-toggle { flex-shrink: 0; min-height: 44px; padding: 10px 14px; font-size: .82rem; }
+        .music-player { width: 100%; max-width: 360px; margin: 16px auto 0; }
+        .music-player iframe { display: block; width: 100%; height: 203px; border: 0; border-radius: 5px; }
+        .music-status { margin: 12px 0 8px; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+        .music-link { color: var(--rose-dark); font-size: .78rem; text-underline-offset: 3px; }
+        .music-link:focus-visible { outline: 3px solid #a9575070; outline-offset: 3px; }
+        .confetti { position: fixed; inset: 0; z-index: 3; width: 100%; height: 100%; pointer-events: none; }
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="floaties" aria-hidden="true"><span class="floaty">♥</span><span class="floaty">✦</span><span class="floaty">♥</span><span class="floaty">✧</span><span class="floaty">♥</span></div>
+    <canvas class="confetti" id="confetti" aria-hidden="true"></canvas>
+    <main class="letter" aria-live="polite">
+        <section class="scene" id="opening">
+            <p class="eyebrow">A little something for you</p>
+            <h1>Hi, <span data-name></span>.</h1>
+            <p class="intro">I made you a tiny corner of the internet. It comes with one question and absolutely no pressure (well, almost none).</p>
+            <button class="primary" id="begin">Tap to begin</button>
+        </section>
+        <section class="scene" id="message" hidden>
+            <p class="eyebrow">A small honest thing</p>
+            <h2>Before I ask…</h2>
+            <p class="typed-copy caret" id="typed" aria-label="A message for you"></p>
+            <button class="primary" id="toQuestion" hidden>One more thing</button>
+        </section>
+        <section class="scene" id="question" hidden>
+            <p class="eyebrow">The important question</p>
+            <h2>Would you go out with me?</h2>
+            <p class="intro">I know a good playlist and excellent snacks are essential parts of the plan.</p>
+            <div class="question-stage" id="questionStage">
+                <div class="choices"><button class="choice choice-yes" id="yes">Yes!</button><button class="choice choice-no" id="no">No</button></div>
+            </div>
+            <p class="hint">The “No” button is feeling a little shy.</p>
+        </section>
+        <section class="scene" id="reasonsScene" hidden>
+            <p class="eyebrow">In case you were wondering</p>
+            <h2>A few reasons I like you</h2>
+            <p class="intro">Tap each little note. I promise I kept the list to four.</p>
+            <div class="reasons" id="reasons"></div>
+            <p class="reasons-progress" id="reasonsProgress" aria-live="polite"></p>
+            <button class="primary" id="toFinal" hidden>Open your last note</button>
+        </section>
+        <section class="scene" id="final" hidden>
+            <p class="eyebrow">And now, the happy part</p>
+            <h2>Here’s to a first date.</h2>
+            <p class="closing-copy" id="closingCopy"></p>
+            <p class="signature">With a smile,<br><span data-sender></span></p>
+        </section>
+        <aside class="music" aria-label="Music for your note">
+            <div class="music-heading">
+                <p class="music-title">&#9835; Ikot<span class="music-artist">Over October</span></p>
+                <button class="secondary music-toggle" id="musicToggle" type="button" aria-controls="musicPlayer">Play music</button>
+            </div>
+            <div class="music-player">
+                <iframe id="musicPlayer" title="Ikot by Over October — official lyric video"
+                    src="https://www.youtube.com/embed/8yvWcZ8BtrQ?enablejsapi=1&amp;playsinline=1&amp;loop=1&amp;playlist=8yvWcZ8BtrQ&amp;rel=0"
+                    width="360" height="203" allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
+                    referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+            </div>
+            <p class="music-status" id="musicStatus" role="status">Getting your soundtrack ready...</p>
+            <a class="music-link" href="https://www.youtube.com/watch?v=8yvWcZ8BtrQ" target="_blank" rel="noopener">Listen on YouTube</a>
+        </aside>
+    </main>
+    <script>
+        // Personalize the page here; the rest of the script uses these values.
+const CONFIG = {
+    name: "Ylliesh",
+    sender: "Zac",
+    message: "I know we've only been together for a week, but somehow, you've already become someone I look forward to talking to every day. Being miles away in Davao while I'm here in Laguna isn't always easy, but I wouldn't trade what we have for anything. ❤️",
+    reasons: [
+        "Your smile — Kahit picture lang minsan, you still have this way of making my day better.",
+        "Your kindness — You're so genuinely mabait, and that's one of the things I really adore about you.",
+        "Your humor — I love how you can make me laugh, even when we're just chatting through a screen.",
+        "Our little beginning — It's only been a week, but I already can't wait to make more memories with you. Someday, we'll finally get to do all the things we can only talk about right now."
+    ],
+    closing: "Davao to Laguna may be a long way, but somehow, you still feel close to me. I know we're just starting, but I'm really happy that I get to call you my baby. Here's to more calls, more laughs, more lambing, and hopefully, our first date together someday. Until then, I'll keep choosing you—even from miles away. ❤️"
+};
+ 
+        const scenes = [...document.querySelectorAll(".scene")];
+        const yesButton = document.getElementById("yes");
+        const noButton = document.getElementById("no");
+        const questionStage = document.getElementById("questionStage");
+        let revealedReasons = 0;
+        let noDodges = 0;
+        const musicToggle = document.getElementById("musicToggle");
+        const musicStatus = document.getElementById("musicStatus");
+        let musicPlayer;
+        let musicReady = false;
+        let musicRequested = false;
+        let musicFailed = false;
+        let musicTouched = false;
+        const musicLoadTimeout = window.setTimeout(() => {
+            if (!musicReady) musicUnavailable();
+        }, 15000);
+ 
+        function requestMusic() {
+            if (musicFailed) return;
+            musicRequested = true;
+            musicToggle.textContent = "Pause music";
+            musicStatus.textContent = musicReady ? "Starting your soundtrack..." : "Loading your soundtrack...";
+            if (musicReady) musicPlayer.playVideo();
+        }
+ 
+        function musicUnavailable() {
+            window.clearTimeout(musicLoadTimeout);
+            musicFailed = true;
+            musicRequested = false;
+            musicToggle.hidden = true;
+            musicStatus.textContent = "Music couldn't connect. Try the player above or listen on YouTube.";
+        }
+ 
+        musicToggle.addEventListener("click", () => {
+            musicTouched = true;
+            if (musicRequested) {
+                musicRequested = false;
+                if (musicReady) musicPlayer.pauseVideo();
+                musicToggle.textContent = "Play music";
+                musicStatus.textContent = "Music paused. Take your time.";
+            } else {
+                requestMusic();
+            }
+        });
+ 
+        // Try autoplay at a gentle volume; keep the controls available if it is blocked.
+        window.onYouTubeIframeAPIReady = () => {
+            musicPlayer = new YT.Player("musicPlayer", {
+                events: {
+                    onReady: (event) => {
+                        window.clearTimeout(musicLoadTimeout);
+                        if (musicFailed) {
+                            musicFailed = false;
+                            musicToggle.hidden = false;
+                            musicToggle.textContent = "Play music";
+                            musicStatus.textContent = "Your soundtrack is ready. Tap Play music.";
+                        }
+                        musicReady = true;
+                        event.target.setVolume(30);
+                        if (musicRequested) event.target.playVideo();
+                    },
+                    onStateChange: (event) => {
+                        if (event.data === YT.PlayerState.PLAYING) {
+                            musicTouched = true;
+                            musicRequested = true;
+                            musicToggle.textContent = "Pause music";
+                            musicStatus.textContent = "Playing Ikot, just for this moment.";
+                        } else if (event.data === YT.PlayerState.PAUSED || event.data === YT.PlayerState.ENDED) {
+                            musicRequested = false;
+                            musicToggle.textContent = "Play music";
+                            musicStatus.textContent = "Music paused. Take your time.";
+                        }
+                    },
+                    onAutoplayBlocked: () => {
+                        musicRequested = false;
+                        musicToggle.textContent = "Play music";
+                        musicStatus.textContent = "Tap Play music or Tap to begin to start the soundtrack.";
+                    },
+                    onError: musicUnavailable
+                }
+            });
+        };
+        const musicApi = document.createElement("script");
+        musicApi.src = "https://www.youtube.com/iframe_api";
+        musicApi.async = true;
+        musicApi.onerror = musicUnavailable;
+        requestMusic();
+        document.head.append(musicApi);
+ 
+        document.querySelectorAll("[data-name]").forEach((element) => { element.textContent = CONFIG.name; });
+        document.querySelectorAll("[data-sender]").forEach((element) => { element.textContent = CONFIG.sender; });
+        document.getElementById("closingCopy").textContent = CONFIG.closing;
+ 
+        function showScene(id) {
+            scenes.forEach((scene) => { scene.hidden = scene.id !== id; });
+        }
+ 
+        document.getElementById("begin").addEventListener("click", () => {
+            if (!musicTouched) requestMusic();
+            showScene("message");
+            const target = document.getElementById("typed");
+            const message = CONFIG.message;
+            let index = 0;
+            const timer = window.setInterval(() => {
+                target.textContent = message.slice(0, ++index);
+                if (index >= message.length) {
+                    window.clearInterval(timer);
+                    target.classList.remove("caret");
+                    document.getElementById("toQuestion").hidden = false;
+                }
+            }, 34);
+        });
+        document.getElementById("toQuestion").addEventListener("click", () => showScene("question"));
+ 
+        function dodgeNo(event) {
+            if (event) { event.preventDefault(); event.stopPropagation(); }
+            const stage = questionStage.getBoundingClientRect();
+            const button = noButton.getBoundingClientRect();
+            const yes = yesButton.getBoundingClientRect();
+            const maxX = Math.max(0, stage.width - button.width);
+            const maxY = Math.max(0, stage.height - button.height);
+            let x = 0;
+            let y = 0;
+            for (let attempt = 0; attempt < 16; attempt++) {
+                x = Math.random() * maxX;
+                y = Math.random() * maxY;
+                const yesX = yes.left - stage.left;
+                const yesY = yes.top - stage.top;
+                if (Math.abs(x - yesX) > 90 || Math.abs(y - yesY) > 55) break;
+            }
+            noButton.classList.add("is-dodging");
+            noButton.style.left = `${x}px`;
+            noButton.style.top = `${y}px`;
+            noDodges++;
+            const scale = Math.min(1.55, 1 + (noDodges * 0.08));
+            yesButton.style.setProperty("--yes-scale", scale);
+        }
+        noButton.addEventListener("pointerenter", (event) => { if (event.pointerType === "mouse") dodgeNo(event); });
+        noButton.addEventListener("pointerdown", dodgeNo);
+        noButton.addEventListener("click", dodgeNo);
+        yesButton.addEventListener("click", () => {
+            yesButton.dataset.taps = String(Number(yesButton.dataset.taps || 0) + 1);
+            showScene("reasonsScene");
+            buildReasons();
+        });
+ 
+        function buildReasons() {
+            const container = document.getElementById("reasons");
+            if (container.childElementCount) return;
+            CONFIG.reasons.forEach((reason, index) => {
+                const button = document.createElement("button");
+                button.className = "reason";
+                button.type = "button";
+                button.setAttribute("aria-expanded", "false");
+                const mark = document.createElement("span");
+                mark.className = "reason-mark";
+                mark.textContent = String(index + 1).padStart(2, "0");
+                const text = document.createElement("span");
+                text.className = "reason-text is-hidden";
+                text.textContent = "Tap to reveal";
+                button.append(mark, text);
+                button.addEventListener("click", () => {
+                    if (button.getAttribute("aria-expanded") === "true") return;
+                    button.setAttribute("aria-expanded", "true");
+                    text.classList.remove("is-hidden");
+                    text.textContent = reason;
+                    revealedReasons++;
+                    const remaining = CONFIG.reasons.length - revealedReasons;
+                    document.getElementById("reasonsProgress").textContent = remaining ? `${remaining} little note${remaining === 1 ? "" : "s"} left` : "That’s my whole list. (For now.)";
+                    if (revealedReasons === CONFIG.reasons.length) document.getElementById("toFinal").hidden = false;
+                });
+                container.append(button);
+            });
+        }
+        document.getElementById("toFinal").addEventListener("click", () => {
+            showScene("final");
+            celebrate();
+        });
+ 
+        function celebrate() {
+            const canvas = document.getElementById("confetti");
+            const context = canvas.getContext("2d");
+            if (!context) return;
+            const ratio = Math.min(window.devicePixelRatio || 1, 2);
+            canvas.width = window.innerWidth * ratio;
+            canvas.height = window.innerHeight * ratio;
+            context.scale(ratio, ratio);
+            const colors = ["#a95750", "#c89b68", "#77816a", "#dfc9af", "#d88878"];
+            const pieces = Array.from({ length: 110 }, () => ({
+                x: Math.random() * window.innerWidth,
+                y: -Math.random() * window.innerHeight,
+                size: 4 + Math.random() * 6,
+                speed: 2 + Math.random() * 4,
+                drift: (Math.random() - .5) * 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                angle: Math.random() * Math.PI
+            }));
+            let frame = 0;
+            function draw() {
+                context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+                pieces.forEach((piece) => {
+                    piece.y += piece.speed;
+                    piece.x += piece.drift;
+                    piece.angle += .04;
+                    context.save();
+                    context.translate(piece.x, piece.y);
+                    context.rotate(piece.angle);
+                    context.fillStyle = piece.color;
+                    context.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * .65);
+                    context.restore();
+                });
+                frame++;
+                if (frame < 180) window.requestAnimationFrame(draw);
+                else context.clearRect(0, 0, window.innerWidth, window.innerHeight);
+            }
+            window.requestAnimationFrame(draw);
+        }
+    </script>
+</body>
+</html>
